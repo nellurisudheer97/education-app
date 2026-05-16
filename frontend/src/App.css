@@ -1,0 +1,7 @@
+@import './index.css';
+
+/* App-level styles (kept minimal) */
+
+html, body, #root {
+  height: 100%;
+}
