@@ -189,42 +189,6 @@ After running migrations, you can create test users through the register endpoin
 ✅ CORS Configuration  
 ✅ Secure File Upload  
 
-## Future Enhancements
 
-- [ ] Certificate generation
-- [ ] Discussion forums
-- [ ] Real-time notifications
-- [ ] Advanced analytics
-- [ ] Payment integration
-- [ ] Mobile app
-- [ ] Video streaming optimization
-- [ ] AI-powered recommendations
 
-## Troubleshooting
 
-### Backend won't start
-- Ensure MySQL is running
-- Check database credentials
-- Verify port 8080 is available
-
-### Frontend can't connect to backend
-- Ensure backend is running on port 8080
-- Check CORS settings in backend
-- Verify API URL in frontend config
-
-### File uploads failing
-- Check upload directory permissions
-- Ensure directory exists: `/uploads`
-- Verify file size limits
-
-## License
-
-MIT License
-
-## Support
-
-For issues and suggestions, please open an issue on the repository.
-
----
-
-Happy Learning! 🚀
