@@ -10,8 +10,8 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:${DB_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/eduapp_db}}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:postgres}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD:postgres}}}
     driver-class-name: org.postgresql.Driver
 
   jpa:
