@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { FiArrowRight, FiBookOpen, FiCheck, FiX, FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../services/api';
@@ -19,18 +19,7 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      setError('Invalid or missing reset token. Please request a new password reset.');
-      setTokenValid(false);
-      return;
-    }
-    
-    // Verify token
-    verifyToken();
-  }, [token]);
-
-  const verifyToken = async () => {
+  const verifyToken = useCallback(async () => {
     try {
       const response = await api.verifyResetToken({ token });
       if (response?.message === 'Token is valid') {
@@ -44,7 +33,17 @@ export default function ResetPassword() {
       setTokenValid(false);
       setError(err.message || 'Failed to verify reset token');
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid or missing reset token. Please request a new password reset.');
+      setTokenValid(false);
+      return;
+    }
+
+    verifyToken();
+  }, [token, verifyToken]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
