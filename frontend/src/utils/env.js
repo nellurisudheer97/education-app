@@ -3,5 +3,7 @@ export function getApiBaseUrl() {
   if (!value) {
     return 'http://localhost:8080/api';
   }
-  return value;
+
+  const normalized = value.replace(/\/+$/, '');
+  return normalized.endsWith('/api') ? normalized : `${normalized}/api`;
 }
