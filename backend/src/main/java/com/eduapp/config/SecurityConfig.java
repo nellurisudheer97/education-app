@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,13 +48,14 @@ public class SecurityConfig {
                 .filter(origin -> !origin.isEmpty())
                 .toList();
 
-        List<String> originPatterns = new java.util.ArrayList<>(origins);
+        List<String> originPatterns = new ArrayList<>(origins);
         originPatterns.add("https://*.up.railway.app");
         originPatterns.add("https://*.railway.app");
 
         configuration.setAllowedOriginPatterns(originPatterns);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
