@@ -4,6 +4,7 @@ const path = require('path');
 
 const buildDir = path.join(__dirname, '..', 'build');
 const port = Number(process.env.PORT || 3000);
+const apiBaseUrl = process.env.API_BASE_URL || process.env.REACT_APP_API_BASE_URL || '';
 
 const contentTypes = {
   '.css': 'text/css',
@@ -35,8 +36,22 @@ const sendFile = (response, filePath) => {
   });
 };
 
+const sendRuntimeConfig = (response) => {
+  response.writeHead(200, {
+    'Content-Type': 'text/javascript',
+    'Cache-Control': 'no-store'
+  });
+  response.end(`window.__APP_CONFIG__ = ${JSON.stringify({ API_BASE_URL: apiBaseUrl })};`);
+};
+
 const server = http.createServer((request, response) => {
   const urlPath = decodeURIComponent(request.url.split('?')[0]);
+
+  if (urlPath === '/env.js') {
+    sendRuntimeConfig(response);
+    return;
+  }
+
   const requestedPath = path.normalize(path.join(buildDir, urlPath));
 
   if (!requestedPath.startsWith(buildDir)) {
