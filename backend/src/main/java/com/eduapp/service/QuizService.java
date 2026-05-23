@@ -336,6 +336,8 @@ public class QuizService {
                 result.getId(),
                 result.getQuiz().getId(),
                 result.getUser().getId(),
+                result.getUser().getFullName(),
+                result.getUser().getEmail(),
                 result.getScore(),
                 result.getTotalMarks(),
                 result.getPercentage(),

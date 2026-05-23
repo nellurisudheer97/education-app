@@ -995,8 +995,18 @@ export default function CourseDetail() {
                 {quizResults.map((result) => (
                   <article className="result-review-card" key={result.id}>
                     <div className="quiz-result">
-                      <strong>{result.status === 'PENDING_REVIEW' ? 'Pending review' : `Grade ${result.grade}`}</strong>
-                      <span>Student #{result.userId} · {result.score}/{result.totalMarks} marks · {result.percentage}%</span>
+                      <div className="result-header">
+                        <div>
+                          <strong>{result.status === 'PENDING_REVIEW' ? 'Pending review' : `Grade ${result.grade}`}</strong>
+                          <span className="student-name">{result.studentName}</span>
+                          <span className="student-email">{result.studentEmail}</span>
+                        </div>
+                        <div className="result-meta">
+                          <span className="result-score">{result.score}/{result.totalMarks} marks · {result.percentage}%</span>
+                          <span className="result-time">Submitted: {formatSubmitDate(result.completedAt)}</span>
+                          <span className="result-duration">Time taken: {formatTimeTaken(result.timeTakenSeconds)}</span>
+                        </div>
+                      </div>
                     </div>
 
                     {(result.answers || [])
@@ -1166,6 +1176,28 @@ function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function formatTimeTaken(totalSeconds) {
+  if (!totalSeconds) return '-';
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  }
+  return `${seconds}s`;
+}
+
+function formatSubmitDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return date.toLocaleDateString('en-US', options);
 }
 
 function getYouTubeEmbedUrl(url) {

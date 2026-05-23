@@ -483,6 +483,54 @@
   padding: 14px;
 }
 
+.result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.result-header strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.student-name {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.student-email {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.result-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+
+.result-score {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.result-time,
+.result-duration {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .answer-review {
   border-top: 1px solid var(--border);
   padding-top: 14px;

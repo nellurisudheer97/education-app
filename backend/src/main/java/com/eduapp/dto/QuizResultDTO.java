@@ -14,6 +14,8 @@ public class QuizResultDTO {
     private Long id;
     private Long quizId;
     private Long userId;
+    private String studentName;
+    private String studentEmail;
     private Integer score;
     private Integer totalMarks;
     private Double percentage;
