@@ -5,6 +5,9 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +29,7 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
 
     private static final String JDBC_PREFIX = "jdbc:";
     private static final String PG_SCHEME   = "postgresql://";
+    private static final String PG_SHORT_SCHEME = "postgres://";
 
     /** Property source name – placed at highest priority so it wins. */
     private static final String SOURCE_NAME = "railwayDatabaseUrlNormalizer";
@@ -38,8 +42,8 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
 
         for (String var : new String[]{"SPRING_DATASOURCE_URL", "DB_URL", "DATABASE_URL"}) {
             String value = environment.getProperty(var);
-            if (value != null && value.startsWith(PG_SCHEME)) {
-                normalized.put(var, JDBC_PREFIX + value);
+            if (value != null && isPostgresUrl(value)) {
+                normalizePostgresUrl(var, value, normalized);
             }
         }
 
@@ -49,5 +53,38 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             environment.getPropertySources()
                        .addFirst(new MapPropertySource(SOURCE_NAME, normalized));
         }
+    }
+
+    private boolean isPostgresUrl(String value) {
+        return value.startsWith(PG_SCHEME) || value.startsWith(PG_SHORT_SCHEME);
+    }
+
+    private void normalizePostgresUrl(String sourceVar, String value, Map<String, Object> normalized) {
+        URI uri = URI.create(value.replaceFirst("^postgres://", PG_SCHEME));
+
+        String jdbcUrl = "jdbc:postgresql://" + uri.getHost();
+        if (uri.getPort() != -1) {
+            jdbcUrl += ":" + uri.getPort();
+        }
+        jdbcUrl += uri.getPath();
+        if (uri.getQuery() != null && !uri.getQuery().isBlank()) {
+            jdbcUrl += "?" + uri.getQuery();
+        }
+
+        normalized.put(sourceVar, jdbcUrl);
+        normalized.put("spring.datasource.url", jdbcUrl);
+
+        String userInfo = uri.getUserInfo();
+        if (userInfo != null && !userInfo.isBlank()) {
+            String[] credentials = userInfo.split(":", 2);
+            normalized.put("spring.datasource.username", decode(credentials[0]));
+            if (credentials.length > 1) {
+                normalized.put("spring.datasource.password", decode(credentials[1]));
+            }
+        }
+    }
+
+    private String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }
