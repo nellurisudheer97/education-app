@@ -26,18 +26,21 @@ public class QuizResult {
     
     private Integer score = 0;
     
+    @Column(name = "total_marks")
     private Integer totalMarks = 0;
     
     private Double percentage = 0.0;
     
+    @Column(name = "is_passed")
     private Boolean isPassed = false;
 
     private String grade = "PENDING";
 
     private String status = "SUBMITTED";
 
+    @Column(name = "time_taken_seconds")
     private Integer timeTakenSeconds = 0;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "completed_at", nullable = false, updatable = false)
     private LocalDateTime completedAt = LocalDateTime.now();
 }

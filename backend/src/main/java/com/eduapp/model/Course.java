@@ -22,19 +22,22 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
     
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
     
     @ManyToOne
     @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
     
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "is_published", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isPublished = false;
     
+    @Column(name = "total_lessons")
     private Integer totalLessons = 0;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

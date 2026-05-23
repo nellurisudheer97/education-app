@@ -22,18 +22,22 @@ public class Lesson {
     @Column(columnDefinition = "TEXT")
     private String content;
     
+    @Column(name = "video_url")
     private String videoUrl;
     
+    @Column(name = "resource_url")
     private String resourceUrl;
     
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
     
+    @Column(name = "order_index")
     private Integer orderIndex;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

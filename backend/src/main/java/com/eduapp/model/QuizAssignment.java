@@ -25,6 +25,6 @@ public class QuizAssignment {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "assigned_at", nullable = false, updatable = false)
     private LocalDateTime assignedAt = LocalDateTime.now();
 }

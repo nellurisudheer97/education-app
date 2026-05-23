@@ -24,13 +24,13 @@ public class PasswordResetToken {
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
     
-    @Column(nullable = false)
+    @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
     
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean used = false;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
     public boolean isExpired() {

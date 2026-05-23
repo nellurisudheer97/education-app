@@ -24,14 +24,18 @@ public class UserProgress {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
     
+    @Column(name = "completed_lessons")
     private Integer completedLessons = 0;
     
+    @Column(name = "total_lessons")
     private Integer totalLessons = 0;
     
+    @Column(name = "progress_percentage")
     private Double progressPercentage = 0.0;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "enrolled_at", nullable = false, updatable = false)
     private LocalDateTime enrolledAt = LocalDateTime.now();
     
+    @Column(name = "last_accessed_at")
     private LocalDateTime lastAccessedAt = LocalDateTime.now();
 }

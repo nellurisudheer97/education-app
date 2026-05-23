@@ -23,15 +23,19 @@ public class QuizAnswer {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    @Column(name = "selected_option")
     private String selectedOption;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "text_answer", columnDefinition = "TEXT")
     private String textAnswer;
 
+    @Column(name = "awarded_marks")
     private Integer awardedMarks = 0;
 
+    @Column(name = "max_marks")
     private Integer maxMarks = 0;
 
+    @Column(name = "is_correct")
     private Boolean isCorrect = false;
 
     private Boolean reviewed = false;

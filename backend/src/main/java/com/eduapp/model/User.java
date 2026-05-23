@@ -26,20 +26,22 @@ public class User {
     @Column(name = "plain_password")
     private String plainPassword;
     
-    @Column(nullable = false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private UserRole role;
     
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
     
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
+    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean isActive = true;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

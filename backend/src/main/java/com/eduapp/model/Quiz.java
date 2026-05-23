@@ -26,16 +26,21 @@ public class Quiz {
     @JoinColumn(name = "lesson_id", nullable = false)
     private Lesson lesson;
     
+    @Column(name = "total_questions")
     private Integer totalQuestions = 0;
     
+    @Column(name = "passing_score")
     private Integer passingScore = 70;
 
+    @Column(name = "timer_minutes")
     private Integer timerMinutes = 30;
 
+    @Column(name = "total_marks")
     private Integer totalMarks = 0;
     
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }

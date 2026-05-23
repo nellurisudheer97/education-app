@@ -15,28 +15,29 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "question_text", columnDefinition = "TEXT", nullable = false)
     private String questionText;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "question_type", nullable = false)
     private QuestionType questionType = QuestionType.MCQ;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "option_a", columnDefinition = "TEXT")
     private String optionA;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "option_b", columnDefinition = "TEXT")
     private String optionB;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "option_c", columnDefinition = "TEXT")
     private String optionC;
     
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "option_d", columnDefinition = "TEXT")
     private String optionD;
     
+    @Column(name = "correct_answer")
     private String correctAnswer;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "sample_answer", columnDefinition = "TEXT")
     private String sampleAnswer;
     
     @ManyToOne
@@ -45,5 +46,6 @@ public class Question {
     
     private Integer marks = 1;
 
+    @Column(name = "order_index")
     private Integer orderIndex = 0;
 }
