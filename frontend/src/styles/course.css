@@ -343,6 +343,63 @@
   font-size: 1.05rem;
 }
 
+.quiz-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: var(--radius);
+  border: 1px solid #e8e8e8;
+}
+
+.result-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.result-status strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.result-status strong.pass {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.result-status strong.fail {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.result-status .grade {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.result-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.9rem;
+}
+
+.result-details .score {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.result-details .percentage {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .quiz-modal {
   width: min(820px, 100%);
 }

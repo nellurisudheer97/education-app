@@ -51,6 +51,7 @@ export default function CourseDetail() {
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [reviewQuiz, setReviewQuiz] = useState(null);
   const [quizResults, setQuizResults] = useState([]);
+  const [studentQuizResultsMap, setStudentQuizResultsMap] = useState({});
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizStartedAt, setQuizStartedAt] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -129,7 +130,12 @@ export default function CourseDetail() {
         }))
       });
       setQuizResult(result);
+      setStudentQuizResultsMap((prev) => ({
+        ...prev,
+        [activeQuiz.id]: result
+      }));
       setActiveQuiz(null);
+      setQuizAnswers({});
       setQuizStartedAt(null);
       setSecondsLeft(0);
       pushToast('Quiz submitted successfully.', 'success');
@@ -587,29 +593,51 @@ export default function CourseDetail() {
                   <p className="sidebar-empty">No quiz is attached to this lesson yet.</p>
                 ) : (
                   <div className="quiz-list">
-                    {quizzes.map((quiz) => (
-                      <article className="quiz-card" key={quiz.id}>
-                        <div>
-                          <h4>{quiz.title}</h4>
-                          <p>{quiz.description || 'Complete this exam to check your understanding.'}</p>
-                          <small>{quiz.totalQuestions} questions · {quiz.totalMarks} marks · {quiz.timerMinutes} min · Pass {quiz.passingScore}%</small>
-                        </div>
-                        <div className="quiz-card-actions">
-                          {!canManageLessons && (
-                            <button className="btn-primary" onClick={() => startQuiz(quiz)}>
-                              Start exam
-                            </button>
-                          )}
-                          {canAssignOrReviewQuizzes && (
-                            <>
-                              <button className="btn-secondary" onClick={() => openAssignQuiz(quiz.id)}>Assign</button>
-                              <button className="btn-secondary" onClick={() => openQuizReview(quiz)}>Review</button>
-                              <button className="btn-danger-outline" onClick={() => setPendingDeleteQuizId(quiz.id)} title="Delete Quiz"><FiTrash2 /></button>
-                            </>
-                          )}
-                        </div>
-                      </article>
-                    ))}
+                    {quizzes.map((quiz) => {
+                      const quizResult = studentQuizResultsMap[quiz.id];
+                      const isPassed = quizResult && quizResult.percentage >= quiz.passingScore;
+                      
+                      return (
+                        <article className="quiz-card" key={quiz.id}>
+                          <div>
+                            <h4>{quiz.title}</h4>
+                            <p>{quiz.description || 'Complete this exam to check your understanding.'}</p>
+                            <small>{quiz.totalQuestions} questions · {quiz.totalMarks} marks · {quiz.timerMinutes} min · Pass {quiz.passingScore}%</small>
+                          </div>
+                          <div className="quiz-card-actions">
+                            {!canManageLessons && (
+                              <>
+                                {quizResult ? (
+                                  <div className="quiz-result-card">
+                                    <div className="result-status">
+                                      <strong className={isPassed ? 'pass' : 'fail'}>
+                                        {quizResult.status === 'PENDING_REVIEW' ? 'Submitted for review' : (isPassed ? '✓ PASS' : '✗ FAIL')}
+                                      </strong>
+                                      <span className="grade">{quizResult.grade}</span>
+                                    </div>
+                                    <div className="result-details">
+                                      <span className="score">{quizResult.score}/{quizResult.totalMarks} marks</span>
+                                      <span className="percentage">{quizResult.percentage}%</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button className="btn-primary" onClick={() => startQuiz(quiz)}>
+                                    Start exam
+                                  </button>
+                                )}
+                              </>
+                            )}
+                            {canAssignOrReviewQuizzes && (
+                              <>
+                                <button className="btn-secondary" onClick={() => openAssignQuiz(quiz.id)}>Assign</button>
+                                <button className="btn-secondary" onClick={() => openQuizReview(quiz)}>Review</button>
+                                <button className="btn-danger-outline" onClick={() => setPendingDeleteQuizId(quiz.id)} title="Delete Quiz"><FiTrash2 /></button>
+                              </>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -932,6 +960,7 @@ export default function CourseDetail() {
                 type="button"
                 onClick={() => {
                   setActiveQuiz(null);
+                  setQuizAnswers({});
                   setQuizStartedAt(null);
                   setSecondsLeft(0);
                 }}
