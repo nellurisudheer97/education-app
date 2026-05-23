@@ -12,57 +12,57 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Normalises PostgreSQL connection URLs supplied by Railway (and similar PaaS
- * platforms) so that the JDBC driver can accept them.
- *
- * <p>Railway exposes the database connection string via {@code DATABASE_URL} in
- * the form {@code postgresql://user:pass@host:port/db}.  The PostgreSQL JDBC
- * driver requires the URL to start with {@code jdbc:postgresql://}.  This
- * post-processor rewrites the relevant environment variables before Spring
- * resolves {@code application.yml} property placeholders, so no manual
- * {@code SPRING_DATASOURCE_URL} override is needed on Railway.</p>
- *
- * <p>Variables inspected (in priority order as declared in application.yml):
- * {@code SPRING_DATASOURCE_URL}, {@code DB_URL}, {@code DATABASE_URL}.</p>
+ * Converts Railway PostgreSQL environment variables into Spring datasource
+ * properties before Hikari and Flyway are initialized.
  */
 public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static final String JDBC_PREFIX = "jdbc:";
-    private static final String PG_SCHEME   = "postgresql://";
-    private static final String PG_SHORT_SCHEME = "postgres://";
-
-    /** Property source name – placed at highest priority so it wins. */
     private static final String SOURCE_NAME = "railwayDatabaseUrlNormalizer";
+    private static final String POSTGRESQL_SCHEME = "postgresql://";
+    private static final String POSTGRES_SCHEME = "postgres://";
+    private static final String JDBC_POSTGRESQL_SCHEME = "jdbc:postgresql://";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment,
                                        SpringApplication application) {
 
         Map<String, Object> normalized = new HashMap<>();
+        String databaseUrl = firstNonBlank(
+                environment.getProperty("SPRING_DATASOURCE_URL"),
+                environment.getProperty("DB_URL"),
+                environment.getProperty("DATABASE_URL")
+        );
 
-        for (String var : new String[]{"SPRING_DATASOURCE_URL", "DB_URL", "DATABASE_URL"}) {
-            String value = environment.getProperty(var);
-            if (value != null && isPostgresUrl(value)) {
-                normalizePostgresUrl(var, value, normalized);
-            }
+        if (isJdbcPostgresUrl(databaseUrl)) {
+            normalized.put("spring.datasource.url", databaseUrl);
+        } else if (isPostgresUrl(databaseUrl)) {
+            normalizeDatabaseUrl(databaseUrl, normalized);
+        } else if (hasRailwayPostgresParts(environment)) {
+            normalizeRailwayParts(environment, normalized);
         }
 
         if (!normalized.isEmpty()) {
-            // Insert at position 0 so these values take precedence over the
-            // OS environment property source that supplied the originals.
-            environment.getPropertySources()
-                       .addFirst(new MapPropertySource(SOURCE_NAME, normalized));
+            environment.getPropertySources().addFirst(new MapPropertySource(SOURCE_NAME, normalized));
         }
     }
 
-    private boolean isPostgresUrl(String value) {
-        return value.startsWith(PG_SCHEME) || value.startsWith(PG_SHORT_SCHEME);
+    private boolean isJdbcPostgresUrl(String value) {
+        return value != null && value.startsWith(JDBC_POSTGRESQL_SCHEME);
     }
 
-    private void normalizePostgresUrl(String sourceVar, String value, Map<String, Object> normalized) {
-        URI uri = URI.create(value.replaceFirst("^postgres://", PG_SCHEME));
+    private boolean isPostgresUrl(String value) {
+        return value != null && (value.startsWith(POSTGRESQL_SCHEME) || value.startsWith(POSTGRES_SCHEME));
+    }
 
-        String jdbcUrl = "jdbc:postgresql://" + uri.getHost();
+    private boolean hasRailwayPostgresParts(ConfigurableEnvironment environment) {
+        return firstNonBlank(environment.getProperty("PGHOST"), environment.getProperty("POSTGRES_HOST")) != null
+                && firstNonBlank(environment.getProperty("PGDATABASE"), environment.getProperty("POSTGRES_DB")) != null;
+    }
+
+    private void normalizeDatabaseUrl(String databaseUrl, Map<String, Object> normalized) {
+        URI uri = URI.create(databaseUrl.replaceFirst("^postgres://", POSTGRESQL_SCHEME));
+        String jdbcUrl = JDBC_POSTGRESQL_SCHEME + uri.getHost();
+
         if (uri.getPort() != -1) {
             jdbcUrl += ":" + uri.getPort();
         }
@@ -71,7 +71,6 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             jdbcUrl += "?" + uri.getQuery();
         }
 
-        normalized.put(sourceVar, jdbcUrl);
         normalized.put("spring.datasource.url", jdbcUrl);
 
         String userInfo = uri.getUserInfo();
@@ -82,6 +81,33 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
                 normalized.put("spring.datasource.password", decode(credentials[1]));
             }
         }
+    }
+
+    private void normalizeRailwayParts(ConfigurableEnvironment environment, Map<String, Object> normalized) {
+        String host = firstNonBlank(environment.getProperty("PGHOST"), environment.getProperty("POSTGRES_HOST"));
+        String port = firstNonBlank(environment.getProperty("PGPORT"), environment.getProperty("POSTGRES_PORT"), "5432");
+        String database = firstNonBlank(environment.getProperty("PGDATABASE"), environment.getProperty("POSTGRES_DB"));
+        String username = firstNonBlank(environment.getProperty("PGUSER"), environment.getProperty("POSTGRES_USER"));
+        String password = firstNonBlank(environment.getProperty("PGPASSWORD"), environment.getProperty("POSTGRES_PASSWORD"));
+
+        normalized.put("spring.datasource.url", JDBC_POSTGRESQL_SCHEME + host + ":" + port + "/" + database);
+        putIfPresent(normalized, "spring.datasource.username", username);
+        putIfPresent(normalized, "spring.datasource.password", password);
+    }
+
+    private void putIfPresent(Map<String, Object> normalized, String key, String value) {
+        if (value != null && !value.isBlank()) {
+            normalized.put(key, value);
+        }
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank() && !value.startsWith("${{")) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private String decode(String value) {
