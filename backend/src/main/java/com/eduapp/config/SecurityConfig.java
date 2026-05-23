@@ -49,6 +49,10 @@ public class SecurityConfig {
                 .toList();
 
         List<String> originPatterns = new ArrayList<>(origins);
+        originPatterns.add("http://localhost:3000");
+        originPatterns.add("http://localhost:3001");
+        originPatterns.add("http://127.0.0.1:3000");
+        originPatterns.add("http://127.0.0.1:3001");
         originPatterns.add("https://*.up.railway.app");
         originPatterns.add("https://*.railway.app");
 
