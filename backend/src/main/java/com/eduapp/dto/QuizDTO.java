@@ -17,4 +17,6 @@ public class QuizDTO {
     private Integer timerMinutes;
     private Integer totalMarks;
     private java.util.List<QuestionDTO> questions;
+    private boolean assigned;
+    private QuizResultDTO latestResult;
 }

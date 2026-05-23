@@ -108,7 +108,17 @@ export default function CourseDetail() {
   const fetchLessonQuizzes = useCallback(async (lessonId) => {
     try {
       const data = await api.getQuizzesByLesson(lessonId);
-      setQuizzes(Array.isArray(data) ? data : []);
+      const quizzesList = Array.isArray(data) ? data : [];
+      setQuizzes(quizzesList);
+
+      // Populate student quiz results map from DTOs
+      const resultsMap = {};
+      quizzesList.forEach((quiz) => {
+        if (quiz.latestResult) {
+          resultsMap[quiz.id] = quiz.latestResult;
+        }
+      });
+      setStudentQuizResultsMap(resultsMap);
     } catch (err) {
       setError(err.message || 'Quizzes could not be loaded.');
     }
@@ -134,17 +144,21 @@ export default function CourseDetail() {
         ...prev,
         [activeQuiz.id]: result
       }));
+      const lessonIdToRefresh = activeQuiz.lessonId || selectedLesson?.id;
       setActiveQuiz(null);
       setQuizAnswers({});
       setQuizStartedAt(null);
       setSecondsLeft(0);
       pushToast('Quiz submitted successfully.', 'success');
+      if (lessonIdToRefresh) {
+        await fetchLessonQuizzes(lessonIdToRefresh);
+      }
     } catch (err) {
       setError(err.message || 'Quiz could not be submitted.');
     } finally {
       setSaving(false);
     }
-  }, [activeQuiz, quizAnswers, quizStartedAt, pushToast, saving]);
+  }, [activeQuiz, quizAnswers, quizStartedAt, pushToast, saving, fetchLessonQuizzes, selectedLesson]);
 
   useEffect(() => {
     if (!selectedLesson?.id) {
@@ -607,7 +621,11 @@ export default function CourseDetail() {
                           <div className="quiz-card-actions">
                             {!canManageLessons && (
                               <>
-                                {quizResult ? (
+                                {quiz.assigned ? (
+                                  <button className="btn-primary" onClick={() => startQuiz(quiz)}>
+                                    Start exam
+                                  </button>
+                                ) : quizResult ? (
                                   <div className="quiz-result-card">
                                     <div className="result-status">
                                       <strong className={isPassed ? 'pass' : 'fail'}>
@@ -621,9 +639,7 @@ export default function CourseDetail() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <button className="btn-primary" onClick={() => startQuiz(quiz)}>
-                                    Start exam
-                                  </button>
+                                  <span className="not-assigned-tag">Not assigned</span>
                                 )}
                               </>
                             )}
