@@ -75,26 +75,15 @@ public class QuizService {
         List<Quiz> allQuizzes = quizRepository.findByLessonId(lessonId);
 
         if (isStudent(user)) {
-            // Students see quizzes assigned to them OR that they have a result for
+            // Students only see quizzes assigned to them
             List<Long> assignedQuizIds = quizAssignmentRepository.findByUserId(user.getId())
                     .stream()
                     .map(a -> a.getQuiz().getId())
                     .collect(Collectors.toList());
 
-            List<Long> completedQuizIds = quizResultRepository.findByUserId(user.getId())
-                    .stream()
-                    .map(r -> r.getQuiz().getId())
-                    .collect(Collectors.toList());
-
             return allQuizzes.stream()
-                    .filter(q -> assignedQuizIds.contains(q.getId()) || completedQuizIds.contains(q.getId()))
-                    .map(quiz -> {
-                        QuizDTO dto = convertToDTO(quiz, false);
-                        dto.setAssigned(assignedQuizIds.contains(quiz.getId()));
-                        quizResultRepository.findFirstByUserIdAndQuizIdOrderByCompletedAtDesc(user.getId(), quiz.getId())
-                                .ifPresent(result -> dto.setLatestResult(convertResultToDTO(result)));
-                        return dto;
-                    })
+                    .filter(q -> assignedQuizIds.contains(q.getId()))
+                    .map(quiz -> convertToDTO(quiz, false))
                     .collect(Collectors.toList());
         }
 
@@ -114,13 +103,7 @@ public class QuizService {
             throw new RuntimeException("This quiz has not been assigned to you.");
         }
 
-        QuizDTO dto = convertToDTO(quiz, !isStudent(getCurrentUser()));
-        if (isStudent(user)) {
-            dto.setAssigned(quizAssignmentRepository.existsByUserIdAndQuizId(user.getId(), quizId));
-            quizResultRepository.findFirstByUserIdAndQuizIdOrderByCompletedAtDesc(user.getId(), quizId)
-                    .ifPresent(result -> dto.setLatestResult(convertResultToDTO(result)));
-        }
-        return dto;
+        return convertToDTO(quiz, !isStudent(getCurrentUser()));
     }
 
     @Transactional
@@ -210,18 +193,7 @@ public class QuizService {
         savedResult.setGrade(needsReview ? "PENDING_REVIEW" : calculateGrade(savedResult.getPercentage()));
         savedResult.setIsPassed(!needsReview && savedResult.getPercentage() >= quiz.getPassingScore());
 
-        QuizResult savedResultEntity = quizResultRepository.save(savedResult);
-
-        // Delete the assignment so student cannot re-submit without a new assignment,
-        // and to allow the instructor to reassign it.
-        if (isStudent(currentUser)) {
-            quizAssignmentRepository.findByUserId(currentUser.getId()).stream()
-                    .filter(a -> a.getQuiz().getId().equals(quizId))
-                    .findFirst()
-                    .ifPresent(quizAssignmentRepository::delete);
-        }
-
-        return convertResultToDTO(savedResultEntity);
+        return convertResultToDTO(quizResultRepository.save(savedResult));
     }
 
     @Transactional
@@ -339,9 +311,7 @@ public class QuizService {
                         .stream()
                         .sorted(Comparator.comparing(Question::getOrderIndex, Comparator.nullsLast(Integer::compareTo)))
                         .map(question -> convertQuestionToDTO(question, includeAnswers))
-                        .toList(),
-                false,
-                null
+                        .toList()
         );
     }
 
