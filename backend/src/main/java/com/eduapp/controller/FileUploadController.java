@@ -60,6 +60,12 @@ public class FileUploadController {
         return handleFileUpload(file, uploadDir + "/resources", "resource");
     }
 
+    @PostMapping("/submission")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FileUploadResponse> uploadSubmission(@RequestParam("file") MultipartFile file) {
+        return handleFileUpload(file, uploadDir + "/submissions", "submission");
+    }
+
     private ResponseEntity<FileUploadResponse> handleFileUpload(MultipartFile file, String directory, String type) {
         try {
             if (file.isEmpty()) {
@@ -106,6 +112,7 @@ public class FileUploadController {
                 case "book" -> bookDir;
                 case "thumbnail" -> uploadDir + "/thumbnails";
                 case "resource" -> uploadDir + "/resources";
+                case "submission" -> uploadDir + "/submissions";
                 default -> uploadDir;
             };
             

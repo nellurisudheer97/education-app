@@ -18,4 +18,6 @@ public class QuizAnswerDTO {
     private Integer maxMarks;
     private Boolean isCorrect;
     private Boolean reviewed;
+    private String fileUrl;
+    private String fileName;
 }

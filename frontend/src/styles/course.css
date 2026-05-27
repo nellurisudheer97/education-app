@@ -76,7 +76,7 @@
   margin-bottom: 12px;
 }
 
-.lesson-progress > span {
+.lesson-progress>span {
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -144,7 +144,7 @@
   border-color: var(--border);
 }
 
-.lessons-sidebar li button > span {
+.lessons-sidebar li button>span {
   width: 30px;
   height: 30px;
   border-radius: var(--radius);
@@ -157,7 +157,7 @@
   font-weight: 900;
 }
 
-.lessons-sidebar li button.active > span {
+.lessons-sidebar li button.active>span {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
@@ -265,7 +265,7 @@
   border-color: var(--primary);
 }
 
-.file-drop > svg {
+.file-drop>svg {
   color: var(--primary);
   font-size: 1.25rem;
 }
@@ -561,6 +561,7 @@
 }
 
 @media (max-width: 900px) {
+
   .course-header,
   .lesson-title-row {
     flex-direction: column;

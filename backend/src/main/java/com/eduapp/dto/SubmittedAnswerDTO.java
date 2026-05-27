@@ -11,4 +11,6 @@ public class SubmittedAnswerDTO {
     private Long questionId;
     private String selectedOption;
     private String textAnswer;
+    private String fileUrl;
+    private String fileName;
 }

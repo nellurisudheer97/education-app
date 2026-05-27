@@ -196,6 +196,8 @@ public class QuizService {
             } else {
                 needsReview = true;
                 answer.setTextAnswer(submitted == null ? "" : submitted.getTextAnswer());
+                answer.setFileUrl(submitted == null ? null : submitted.getFileUrl());
+                answer.setFileName(submitted == null ? null : submitted.getFileName());
                 answer.setAwardedMarks(0);
                 answer.setReviewed(false);
                 answer.setIsCorrect(false);
@@ -394,7 +396,9 @@ public class QuizService {
                 answer.getAwardedMarks(),
                 answer.getMaxMarks(),
                 answer.getIsCorrect(),
-                answer.getReviewed()
+                answer.getReviewed(),
+                answer.getFileUrl(),
+                answer.getFileName()
         );
     }
 

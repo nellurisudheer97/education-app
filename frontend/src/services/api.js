@@ -197,6 +197,12 @@ const api = {
     return uploadRequest('/upload/resource', formData).then((response) => normalizeUploadResponse(response, 'resource'));
   },
 
+  uploadSubmission: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return uploadRequest('/upload/submission', formData).then((response) => normalizeUploadResponse(response, 'submission'));
+  },
+
   getAssetUrl
 };
 

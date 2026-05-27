@@ -72,6 +72,7 @@ export default function CourseDetail() {
   const [saving, setSaving] = useState(false);
   const [pendingDeleteQuizId, setPendingDeleteQuizId] = useState(null);
   const [pendingDeleteLessonId, setPendingDeleteLessonId] = useState(null);
+  const [uploadingFiles, setUploadingFiles] = useState({});
   const navigate = useNavigate();
   const { toasts, pushToast, removeToast } = useToasts();
   const user = getCurrentUser();
@@ -136,7 +137,9 @@ export default function CourseDetail() {
         answers: (activeQuiz.questions || []).map((question) => ({
           questionId: question.id,
           selectedOption: quizAnswers[question.id]?.selectedOption || '',
-          textAnswer: quizAnswers[question.id]?.textAnswer || ''
+          textAnswer: quizAnswers[question.id]?.textAnswer || '',
+          fileUrl: quizAnswers[question.id]?.fileUrl || '',
+          fileName: quizAnswers[question.id]?.fileName || ''
         }))
       });
       setQuizResult(result);
@@ -957,15 +960,77 @@ export default function CourseDetail() {
                     ))}
                   </div>
                 ) : (
-                  <textarea
-                    rows="6"
-                    placeholder="Write your answer here."
-                    value={quizAnswers[question.id]?.textAnswer || ''}
-                    onChange={(e) => setQuizAnswers({
-                      ...quizAnswers,
-                      [question.id]: { textAnswer: e.target.value }
-                    })}
-                  />
+                  <div className="descriptive-answer-wrapper">
+                    <textarea
+                      rows="6"
+                      placeholder="Write your answer here."
+                      value={quizAnswers[question.id]?.textAnswer || ''}
+                      onChange={(e) => setQuizAnswers({
+                        ...quizAnswers,
+                        [question.id]: {
+                          ...quizAnswers[question.id],
+                          textAnswer: e.target.value
+                        }
+                      })}
+                    />
+                    
+                    <div className="file-attachment-wrapper">
+                      {quizAnswers[question.id]?.fileUrl ? (
+                        <div className="attached-file-info">
+                          <FiPaperclip />
+                          <span className="file-name">{quizAnswers[question.id]?.fileName}</span>
+                          <button 
+                            type="button" 
+                            className="btn-remove-attachment"
+                            title="Remove attachment" 
+                            onClick={() => setQuizAnswers({
+                              ...quizAnswers,
+                              [question.id]: {
+                                ...quizAnswers[question.id],
+                                fileUrl: null,
+                                fileName: null
+                              }
+                            })}
+                          >
+                            <FiX />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="file-attach-label">
+                          <FiUpload />
+                          <span>{uploadingFiles[question.id] ? 'Uploading...' : 'Attach PDF or Photo'}</span>
+                          <input
+                            type="file"
+                            accept="application/pdf,image/*"
+                            disabled={uploadingFiles[question.id]}
+                            style={{ display: 'none' }}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              
+                              setUploadingFiles((prev) => ({ ...prev, [question.id]: true }));
+                              try {
+                                const res = await api.uploadSubmission(file);
+                                setQuizAnswers((prev) => ({
+                                  ...prev,
+                                  [question.id]: {
+                                    ...prev[question.id],
+                                    fileUrl: res.url,
+                                    fileName: res.originalFilename || file.name
+                                  }
+                                }));
+                                pushToast('File attached successfully.', 'success');
+                              } catch (err) {
+                                pushToast(err.message || 'Failed to upload attachment.', 'error');
+                              } finally {
+                                setUploadingFiles((prev) => ({ ...prev, [question.id]: false }));
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 )}
               </fieldset>
             ))}
@@ -1031,6 +1096,13 @@ export default function CourseDetail() {
                         <div className="answer-review" key={answer.id}>
                           <strong>{answer.questionText}</strong>
                           <p>{answer.textAnswer || 'No answer submitted.'}</p>
+                          {answer.fileUrl && (
+                            <div className="answer-attachment">
+                              <a href={api.getAssetUrl(answer.fileUrl)} target="_blank" rel="noreferrer" className="attachment-link">
+                                <FiPaperclip /> {answer.fileName || 'Open attachment'}
+                              </a>
+                            </div>
+                          )}
                           <label>
                             Marks out of {answer.maxMarks}
                             <input

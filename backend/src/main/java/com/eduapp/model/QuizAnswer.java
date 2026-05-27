@@ -29,6 +29,12 @@ public class QuizAnswer {
     @Column(name = "text_answer", columnDefinition = "TEXT")
     private String textAnswer;
 
+    @Column(name = "file_url", length = 500)
+    private String fileUrl;
+
+    @Column(name = "file_name", length = 255)
+    private String fileName;
+
     @Column(name = "awarded_marks")
     private Integer awardedMarks = 0;
 
